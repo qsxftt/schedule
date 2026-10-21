@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Расписание 💕 Данил & Полина</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1324;
+      --card-bg: #142036;
+      --header-bg: #182844;
+      --border-color: #273e63;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --hour-line: rgba(255, 255, 255, 0.08);
+
+      /* Colors requested by user */
+      --danil-blue: #0284c7;
+      --danil-blue-glow: rgba(2, 132, 199, 0.4);
+      --danil-green: #10b981;
+      --danil-green-glow: rgba(16, 185, 129, 0.4);
+      --polina-pink: #ec4899;
+      --polina-pink-glow: rgba(236, 72, 153, 0.4);
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --header-bg: #f1f5f9;
+      --border-color: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --hour-line: rgba(0, 0, 0, 0.06);
+
+      --danil-blue: #0284c7;
+      --danil-blue-glow: rgba(2, 132, 199, 0.2);
+      --danil-green: #059669;
+      --danil-green-glow: rgba(5, 150, 105, 0.2);
+      --polina-pink: #db2777;
+      --polina-pink-glow: rgba(219, 39, 119, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 8px 6px 30px 6px;
+      }
+    }
+
+    .main-wrap {
+      max-width: 1560px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+
+    /* Top Control Bar */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border-color);
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .week-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-arrow {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      font-size: 1rem;
+    }
+
+    .btn-arrow:hover {
+      background: var(--border-color);
+    }
+
+    .btn-today {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-today:hover {
+      background: var(--border-color);
+    }
+
+    .week-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .week-dates {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* 3 Mode Buttons */
+    .mode-controls {
+      display: inline-flex;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      gap: 4px;
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .mode-btn:hover {
+      color: var(--text);
+    }
+
+    .mode-btn.active-danil {
+      background: var(--danil-blue);
+      color: #ffffff;
+      box-shadow: 0 4px 12px var(--danil-blue-glow);
+    }
+
+    .mode-btn.active-polina {
+      background: var(--polina-pink);
+      color: #ffffff;
+      box-shadow: 0 4px 12px var(--polina-pink-glow);
+    }
+
+    .mode-btn.active-overlay {
+      background: linear-gradient(135deg, #0284c7 0%, #ec4899 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 16px var(--polina-pink-glow);
+    }
+
+    /* Right tools */
+    .right-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .style-pill {
+      background: var(--bg);
+      border: 1px solid var(--border-color);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .style-pill:hover {
+      background: var(--border-color);
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg);
+      border: 1px solid var(--border-color);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+    }
+
+    /* Sub-bar: Info / Legend */
+    .info-subbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 18px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .legend-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .chip-box {
+      width: 13px;
+      height: 13px;
+      border-radius: 4px;
+    }
+
+    /* =====================================================================
+       COMMON STICKER STYLING (Used in Desktop & Mobile)
+    ===================================================================== */
+    .sticker {
+      position: absolute;
+      border-radius: 9px;
+      padding: 7px 9px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      cursor: pointer;
+      transition: transform 0.15s ease, z-index 0.1s ease, box-shadow 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .sticker:hover {
+      transform: scale(1.02);
+      z-index: 50 !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    }
+
+    .sticker-danil {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+
+    .sticker-danil-online {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border-color: rgba(52, 211, 153, 0.45);
+    }
+
+    .sticker-polina {
+      background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+      color: #ffffff;
+      border-color: rgba(244, 114, 182, 0.45);
+    }
+
+    .sticker-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      opacity: 0.95;
+      margin-bottom: 2px;
+      letter-spacing: 0.02em;
+    }
+
+    .sticker-title {
+      font-weight: 800;
+      font-size: 0.86rem;
+      line-height: 1.25;
+      word-break: break-word;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    }
+
+    .badge-online {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.66rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #ffffff;
+      margin-top: 3px;
+      align-self: flex-start;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .pair-num-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      margin-right: 5px;
+      vertical-align: middle;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sticker-author-tag {
+      position: absolute;
+      bottom: 5px;
+      right: 7px;
+      font-size: 0.64rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.3);
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .hour-grid-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--hour-line);
+      pointer-events: none;
+    }
+
+    .day-free-banner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    /* =====================================================================
+       1. DESKTOP TIMETABLE (6 columns side-by-side)
+    ===================================================================== */
+    .desktop-view-container {
+      display: block;
+    }
+
+    .timetable-wrapper {
+      position: relative;
+      overflow-x: auto;
+      overflow-y: hidden;
+      width: 100%;
+    }
+
+    .timetable {
+      display: grid;
+      grid-template-columns: 75px repeat(6, 1fr);
+      min-width: 1080px;
+      position: relative;
+    }
+
+    .header-cell {
+      padding: 10px 8px;
+      text-align: center;
+      background: var(--header-bg);
+      font-weight: 800;
+      font-size: 0.92rem;
+      border-bottom: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+
+    .header-cell.time-head {
+      border-left: none;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-cell:last-child {
+      border-right: none;
+    }
+
+    .header-cell.today-header {
+      background: linear-gradient(180deg, rgba(2, 132, 199, 0.25) 0%, var(--header-bg) 100%);
+      color: #38bdf8;
+    }
+
+    .day-date-sub {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .time-col {
+      position: relative;
+      border-right: 1px solid var(--border-color);
+      background: var(--header-bg);
+    }
+
+    .hour-label {
+      position: absolute;
+      left: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transform: translateY(-50%);
+    }
+
+    .day-col {
+      position: relative;
+      border-right: 1px solid var(--border-color);
+      background: var(--card-bg);
+    }
+
+    .day-col:last-child {
+      border-right: none;
+    }
+
+    /* =====================================================================
+       2. MOBILE VIEW: CYCLIC DAY MODULES (Matches Screenshot!)
+    ===================================================================== */
+    .mobile-view-container {
+      display: none;
+      padding: 10px 8px;
+    }
+
+    .mobile-quick-nav {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+      scrollbar-width: none;
+    }
+    .mobile-quick-nav::-webkit-scrollbar { display: none; }
+
+    .mob-day-pill {
+      background: var(--bg);
+      border: 1px solid var(--border-color);
+      color: var(--text);
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .mob-day-pill.is-today {
+      border-color: #38bdf8;
+      color: #38bdf8;
+      background: rgba(2, 132, 199, 0.15);
+    }
+
+    /* Each Day Module on Mobile (with its own Time Column + Stickers!) */
+    .mobile-day-module {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      margin-bottom: 22px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    .mobile-day-module.is-today-module {
+      border: 2px solid #38bdf8;
+    }
+
+    .mobile-module-header {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--header-bg);
+    }
+
+    .mob-head-time {
+      padding: 10px 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.05em;
+    }
+
+    .mob-head-day {
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mob-day-title-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .mob-day-short {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .mob-day-date {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .today-mini-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      background: #0284c7;
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .mobile-module-grid {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      position: relative;
+    }
+
+    .mobile-time-col {
+      position: relative;
+      background: var(--header-bg);
+      border-right: 1px solid var(--border-color);
+    }
+
+    .mobile-track-col {
+      position: relative;
+      background: var(--card-bg);
+      overflow: hidden;
+    }
+
+    /* Switch on Mobile */
+    @media (max-width: 860px) {
+      .desktop-view-container {
+        display: none !important;
+      }
+      .mobile-view-container {
+        display: block !important;
+      }
+      .style-pill {
+        display: none;
+      }
+      .top-bar {
+        padding: 10px 12px;
+      }
+      .mode-btn {
+        padding: 7px 11px;
+        font-size: 0.82rem;
+      }
+      .week-title {
+        font-size: 0.98rem;
+      }
+    }
+
+    /* Bottom summary bar */
+    .summary-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--header-bg);
+      border-top: 1px solid var(--border-color);
+      gap: 12px;
+      font-size: 0.82rem;
+    }
+
+    /* Sync Button Animation & Toast Notification */
+    .syncing #syncIcon {
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(90px);
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <div class="main-wrap">
+
+    <!-- Top Navigation Toolbar -->
+    <div class="top-bar">
+      
+      <!-- Week Switcher with Auto Date & Parity -->
+      <div class="week-nav">
+        <button class="btn-arrow" onclick="shiftWeek(-1)" title="Предыдущая неделя">&lt;</button>
+        <button class="btn-arrow" onclick="shiftWeek(1)" title="Следующая неделя">&gt;</button>
+        <button class="btn-today" onclick="resetToCurrentWeek()" title="Текущая неделя">Сегодня</button>
+        <div>
+          <div class="week-title" id="weekTitle">Загрузка...</div>
+          <div class="week-dates" id="weekDates">...</div>
+        </div>
+      </div>
+
+      <!-- 3 MODE BUTTONS -->
+      <div class="mode-controls">
+        <button class="mode-btn" id="btnDanil" onclick="setMode('danil')">
+          <span>👨 Данил</span>
+        </button>
+        <button class="mode-btn" id="btnPolina" onclick="setMode('polina')">
+          <span>👩 Полина</span>
+        </button>
+        <button class="mode-btn active-overlay" id="btnOverlay" onclick="setMode('overlay')">
+          <span>💕 Наложить</span>
+        </button>
+      </div>
+
+      /* Right tools */
+      <div class="right-tools">
+        <button class="style-pill" id="btnOverlayStyle" onclick="toggleOverlayStyle()">
+          Стиль: 50% / 50%
+        </button>
+        <button class="btn-arrow" id="syncBtn" onclick="syncSchedule(true)" title="Синхронизировать расписание с GitHub">
+          <span id="syncIcon" style="display:inline-block; transition:transform 0.4s ease;">🔄</span>
+        </button>
+        <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Светлая/тёмная тема">
+          ☀️
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Info & Legend Subbar -->
+    <div class="info-subbar">
+      <div class="legend-row">
+        <div class="legend-chip">
+          <span class="chip-box" style="background:var(--danil-blue);"></span>
+          <span>Данил (оффлайн)</span>
+        </div>
+        <div class="legend-chip">
+          <span class="chip-box" style="background:var(--danil-green);"></span>
+          <span>Данил (онлайн)</span>
+        </div>
+        <div class="legend-chip">
+          <span class="chip-box" style="background:var(--polina-pink);"></span>
+          <span>Полина (розовый)</span>
+        </div>
+      </div>
+      <div>
+        <span>🌐 Зелёные пары у Данила — онлайн • Календарь переключается автоматически</span>
+      </div>
+    </div>
+
+    <!-- 1. DESKTOP VIEW (Visible on width > 860px) -->
+    <div class="desktop-view-container">
+      <div class="timetable-wrapper">
+        <div class="timetable" id="desktopTimetable">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. MOBILE VIEW: CYCLIC DAY MODULES (Visible on width <= 860px) -->
+    <div class="mobile-view-container">
+      <div class="mobile-quick-nav" id="mobileQuickNav">
+        <!-- Quick Day Jump Pills rendered by JS -->
+      </div>
+      <div id="mobileDaysFeed">
+        <!-- Cyclic timeline modules rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Bottom summary bar -->
+    <div class="summary-bar">
+      <div style="font-weight: 600; color: var(--text);">
+        💕 Расписание Данила и Полины
+      </div>
+      <div style="color:var(--text-muted); font-size:0.78rem;">
+        Среда 19:15 и Сб 08:30 — онлайн (зелёные) • Физра Полины по сетке ГУКа (08:30 / 16:00)
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* =====================================================================
+       📝 РАСПИСАНИЕ (ЗДЕСЬ МОЖНО ЛЕГКО МЕНЯТЬ И ДОБАВЛЯТЬ ПАРЫ)
+       Формат: p("ЧЧ:ММ - ЧЧ:ММ", "Название предмета", isOnline)
+       - isOnline: true -> пара из дома (зелёный цвет)
+       - isOnline: false (или пропустить) -> оффлайн в универе
+    ===================================================================== */
+    function getPairNumber(startMins, explicitNum) {
+      if (explicitNum) return explicitNum;
+      if (startMins <= 9 * 60 + 5) return 1;
+      if (startMins <= 11 * 60) return 2;
+      if (startMins <= 12 * 60 + 45) return 3;
+      if (startMins <= 14 * 60 + 45) return 4;
+      if (startMins <= 16 * 60 + 30) return 5;
+      if (startMins <= 18 * 60) return 6;
+      return 7;
+    }
+
+    function p(timeStr, title, isOnline = false, explicitNum = null) {
+      const parts = timeStr.split('-').map(s => s.trim());
+      const [h1, m1] = parts[0].split(':').map(Number);
+      const [h2, m2] = parts[1].split(':').map(Number);
+      const start = h1 * 60 + m1;
+      const end = h2 * 60 + m2;
+      return {
+        start: start,
+        end: end,
+        timeStr: timeStr,
+        title: title,
+        isOnline: Boolean(isOnline),
+        num: getPairNumber(start, explicitNum)
+      };
+    }
+
+    const DEFAULT_SCHEDULE_DATA = {
+      version: 1,
+      updatedAt: "2026-10-21",
+      danil: {
+        even: {
+          mon: [
+            { time: "10:15 - 11:45", title: "Системная аналитика" },
+            { time: "16:00 - 17:30", title: "Современные языки программирования" }
+          ],
+          tue: [
+            { time: "10:15 - 11:45", title: "Алгоритмы и анализ сложности" },
+            { time: "16:00 - 17:30", title: "Теория вероятностей" },
+            { time: "17:40 - 19:10", title: "Базы данных" }
+          ],
+          wed: [
+            { time: "10:15 - 11:45", title: "Теория вероятностей" },
+            { time: "12:00 - 13:30", title: "Эффективные коммуникации" },
+            { time: "16:00 - 17:30", title: "Прикладная физическая культура" },
+            { time: "19:15 - 20:45", title: "Системная аналитика", isOnline: true }
+          ],
+          thu: [
+            { time: "12:00 - 13:30", title: "Современные цифровые инструменты" },
+            { time: "16:00 - 17:30", title: "Современные цифровые инструменты" }
+          ],
+          fri: [
+            { time: "10:15 - 11:45", title: "Прикладная физическая культура" }
+          ],
+          sat: [
+            { time: "08:30 - 10:00", title: "Компьютерные сети", isOnline: true }
+          ]
+        },
+        odd: {
+          mon: [
+            { time: "12:00 - 13:30", title: "Алгоритмы и анализ сложности" },
+            { time: "16:00 - 17:30", title: "Современные языки программирования" }
+          ],
+          tue: [
+            { time: "10:15 - 11:45", title: "Алгоритмы и анализ сложности" },
+            { time: "14:15 - 15:45", title: "Базы данных" },
+            { time: "16:00 - 17:30", title: "Теория вероятностей" },
+            { time: "17:40 - 19:10", title: "Базы данных" }
+          ],
+          wed: [
+            { time: "10:15 - 11:45", title: "Теория вероятностей" },
+            { time: "12:00 - 13:30", title: "Эффективные коммуникации" },
+            { time: "16:00 - 17:30", title: "Прикладная физическая культура" },
+            { time: "19:15 - 20:45", title: "Системная аналитика", isOnline: true }
+          ],
+          thu: [
+            { time: "12:00 - 13:30", title: "Современные цифровые инструменты" },
+            { time: "16:00 - 17:30", title: "Современные цифровые инструменты" }
+          ],
+          fri: [
+            { time: "10:15 - 11:45", title: "Прикладная физическая культура" }
+          ],
+          sat: [
+            { time: "08:30 - 10:00", title: "Компьютерные сети", isOnline: true }
+          ]
+        }
+      },
+      polina: {
+        even: {
+          mon: [
+            { time: "09:00 - 10:30", title: "Управление конфликтами" },
+            { time: "10:40 - 12:10", title: "Управление человеческими ресурсами" },
+            { time: "12:20 - 13:50", title: "Управление человеческими ресурсами" },
+            { time: "14:30 - 16:00", title: "Второй иностранный язык" },
+            { time: "16:10 - 17:40", title: "Второй иностранный язык" }
+          ],
+          tue: [],
+          wed: [
+            { time: "08:30 - 10:00", title: "Прикладная физическая культура" },
+            { time: "12:20 - 13:50", title: "Деловой английский язык" },
+            { time: "14:30 - 16:00", title: "Командообразование" },
+            { time: "16:10 - 17:40", title: "Командообразование" }
+          ],
+          thu: [
+            { time: "10:15 - 11:45", title: "Риторика" },
+            { time: "12:00 - 13:30", title: "Риторика" },
+            { time: "14:30 - 16:00", title: "История этики" },
+            { time: "16:10 - 17:40", title: "История этики" }
+          ],
+          fri: [
+            { time: "09:00 - 10:30", title: "Креативные экономики" },
+            { time: "10:40 - 12:10", title: "Креативные экономики" },
+            { time: "12:20 - 13:50", title: "Креативные экономики" },
+            { time: "16:00 - 17:30", title: "Прикладная физическая культура" }
+          ],
+          sat: [
+            { time: "09:00 - 10:30", title: "Управление конфликтами" },
+            { time: "12:20 - 13:50", title: "Математика" },
+            { time: "14:30 - 16:00", title: "Математика" }
+          ]
+        },
+        odd: {
+          mon: [
+            { time: "09:00 - 10:30", title: "Управление конфликтами" },
+            { time: "10:40 - 12:10", title: "Управление человеческими ресурсами" },
+            { time: "12:20 - 13:50", title: "Управление человеческими ресурсами" },
+            { time: "14:30 - 16:00", title: "Второй иностранный язык" },
+            { time: "16:10 - 17:40", title: "Второй иностранный язык" }
+          ],
+          tue: [],
+          wed: [
+            { time: "08:30 - 10:00", title: "Прикладная физическая культура" },
+            { time: "12:20 - 13:50", title: "Деловой английский язык" },
+            { time: "14:30 - 16:00", title: "Командообразование" }
+          ],
+          thu: [
+            { time: "10:15 - 11:45", title: "Риторика" },
+            { time: "12:00 - 13:30", title: "Риторика" },
+            { time: "14:30 - 16:00", title: "История этики" },
+            { time: "16:10 - 17:40", title: "История этики" }
+          ],
+          fri: [
+            { time: "09:00 - 10:30", title: "Креативные экономики" },
+            { time: "10:40 - 12:10", title: "Креативные экономики" },
+            { time: "12:20 - 13:50", "title": "Креативные экономики" },
+            { time: "16:00 - 17:30", title: "Прикладная физическая культура" }
+          ],
+          sat: [
+            { time: "09:00 - 10:30", title: "Управление конфликтами" },
+            { time: "12:20 - 13:50", title: "Математика" },
+            { time: "14:30 - 16:00", title: "Математика" }
+          ]
+        }
+      }
+    };
+
+    const STORAGE_KEY = 'danil_polina_schedule_v2';
+    const GITHUB_SCHEDULE_URL = 'https://raw.githubusercontent.com/qsxftt/schedule/main/schedule.json';
+
+    let currentScheduleData = DEFAULT_SCHEDULE_DATA;
+
+    // Load cached schedule from localStorage immediately on startup
+    try {
+      const cached = localStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.danil && parsed.polina) {
+          currentScheduleData = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('LocalStorage load error:', e);
+    }
+
+    function parseScheduleData(rawObj) {
+      const res = { danil: { even: {}, odd: {} }, polina: { even: {}, odd: {} } };
+      for (const person of ['danil', 'polina']) {
+        for (const parity of ['even', 'odd']) {
+          const days = (rawObj && rawObj[person] && rawObj[person][parity]) || {};
+          for (const d of ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']) {
+            const list = days[d] || [];
+            res[person][parity][d] = list.map(item => p(item.time, item.title, Boolean(item.isOnline), item.num));
+          }
+        }
+      }
+      return res;
+    }
+
+    function showToast(msg) {
+      let t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    async function syncSchedule(isManual = false) {
+      const btn = document.getElementById('syncBtn');
+      if (btn) btn.classList.add('syncing');
+      try {
+        const res = await fetch(`${GITHUB_SCHEDULE_URL}?_t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const remote = await res.json();
+        if (remote && remote.danil && remote.polina) {
+          const currentStr = JSON.stringify(currentScheduleData);
+          const remoteStr = JSON.stringify(remote);
+          if (currentStr !== remoteStr) {
+            currentScheduleData = remote;
+            try {
+              localStorage.setItem(STORAGE_KEY, remoteStr);
+            } catch(e) {}
+            renderAll();
+            showToast('✨ Расписание обновлено из GitHub');
+          } else if (isManual) {
+            showToast('👍 Расписание уже актуально');
+          }
+        }
+      } catch (err) {
+        console.log('Sync note:', err.message);
+        if (isManual) {
+          showToast('📱 Офлайн-режим: данные загружены из памяти');
+        }
+      } finally {
+        if (btn) {
+          setTimeout(() => btn.classList.remove('syncing'), 450);
+        }
+      }
+    }
+
+    /* =====================================================================
+       AUTOMATIC CALENDAR DATE & WEEK PARITY LOGIC
+    ===================================================================== */
+    let currentOffsetWeeks = 0;
+    let currentMode = 'overlay'; // 'danil', 'polina', 'overlay'
+    let overlayStyle = 'split';  // 'split' (50/50) or 'layer'
+    let isDark = true;
+
+    const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const DAY_NAMES = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+    const DAY_SHORTS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+    const MONTHS_GENITIVE = ['янв.', 'февр.', 'мар.', 'апр.', 'мая', 'июн.', 'июл.', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'];
+
+    function getWeekInfo(offsetWeeks = 0) {
+      const now = new Date();
+      const currentDay = now.getDay();
+      const diffToMon = now.getDate() - currentDay + (currentDay === 0 ? -6 : 1) + (offsetWeeks * 7);
+      const monday = new Date(now.getFullYear(), now.getMonth(), diffToMon);
+      monday.setHours(0, 0, 0, 0);
+
+      // ISO week calculation
+      const temp = new Date(monday.getTime());
+      temp.setDate(temp.getDate() + 3);
+      const jan4 = new Date(temp.getFullYear(), 0, 4);
+      const weekNum = 1 + Math.round(((temp.getTime() - jan4.getTime()) / 86400000 - 3 + (jan4.getDay() + 6) % 7) / 7);
+      const isEven = (weekNum % 2 === 0);
+
+      const days = [];
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(monday.getTime());
+        d.setDate(d.getDate() + i);
+        const dayOfMonth = d.getDate();
+        const monthNum = d.getMonth() + 1;
+        const dateStr = `${String(dayOfMonth).padStart(2,'0')}.${String(monthNum).padStart(2,'0')}`;
+        
+        const isToday = (offsetWeeks === 0 && d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear());
+
+        days.push({
+          id: DAY_KEYS[i],
+          name: DAY_NAMES[i],
+          short: DAY_SHORTS[i],
+          dateStr: dateStr,
+          rawDate: d,
+          isToday: isToday
+        });
+      }
+
+      const sat = days[5].rawDate;
+      const rangeText = `${monday.getDate()} ${MONTHS_GENITIVE[monday.getMonth()]} — ${sat.getDate()} ${MONTHS_GENITIVE[sat.getMonth()]} ${sat.getFullYear()} г.`;
+
+      return {
+        weekNum,
+        isEven,
+        parityKey: isEven ? 'even' : 'odd',
+        rangeText,
+        days,
+        isCurrentWeek: (offsetWeeks === 0)
+      };
+    }
+
+    /* Timetable Scale Config: 08:00 to 21:00 */
+    const DAY_START_MIN = 8 * 60;        // 08:00
+    const DAY_END_MIN = 21 * 60;         // 21:00
+    const TOTAL_MINUTES = DAY_END_MIN - DAY_START_MIN;
+    const PX_PER_MIN = 1.15;
+    const TRACK_HEIGHT = TOTAL_MINUTES * PX_PER_MIN;
+
+    /* Controller actions */
+    function shiftWeek(delta) {
+      currentOffsetWeeks += delta;
+      renderAll();
+    }
+
+    function resetToCurrentWeek() {
+      currentOffsetWeeks = 0;
+      renderAll();
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('btnDanil').className = `mode-btn ${mode === 'danil' ? 'active-danil' : ''}`;
+      document.getElementById('btnPolina').className = `mode-btn ${mode === 'polina' ? 'active-polina' : ''}`;
+      document.getElementById('btnOverlay').className = `mode-btn ${mode === 'overlay' ? 'active-overlay' : ''}`;
+      renderAll();
+    }
+
+    function toggleOverlayStyle() {
+      overlayStyle = overlayStyle === 'split' ? 'layer' : 'split';
+      document.getElementById('btnOverlayStyle').textContent = overlayStyle === 'split' ? 'Стиль: 50% / 50%' : 'Стиль: Накладка';
+      renderAll();
+    }
+
+    function toggleTheme() {
+      isDark = !isDark;
+      if (isDark) {
+        document.body.removeAttribute('data-theme');
+        document.getElementById('themeBtn').textContent = '☀️';
+      } else {
+        document.body.setAttribute('data-theme', 'light');
+        document.getElementById('themeBtn').textContent = '🌙';
+      }
+    }
+
+    function scrollToMobileDay(dayId) {
+      const el = document.getElementById(`mob-module-${dayId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    /* =====================================================================
+       STICKER GENERATOR HELPER
+    ===================================================================== */
+    function populateTrackStickers(trackCol, danilPairs, polinaPairs) {
+      // Hour grid lines
+      for (let h = 8; h <= 21; h++) {
+        const mins = h * 60;
+        const top = (mins - DAY_START_MIN) * PX_PER_MIN;
+        const line = document.createElement('div');
+        line.className = 'hour-grid-line';
+        line.style.top = `${top}px`;
+        trackCol.appendChild(line);
+      }
+
+      // Empty message
+      if (currentMode === 'danil' && danilPairs.length === 0) {
+        trackCol.innerHTML += `<div class="day-free-banner">🌴 Нет пар</div>`;
+      } else if (currentMode === 'polina' && polinaPairs.length === 0) {
+        trackCol.innerHTML += `<div class="day-free-banner">🎉 Выходной</div>`;
+      } else if (currentMode === 'overlay' && danilPairs.length === 0 && polinaPairs.length === 0) {
+        trackCol.innerHTML += `<div class="day-free-banner">✨ Оба свободны</div>`;
+      }
+
+      // Danil Stickers
+      if (currentMode === 'danil' || currentMode === 'overlay') {
+        danilPairs.forEach(p => {
+          const top = (p.start - DAY_START_MIN) * PX_PER_MIN;
+          const height = (p.end - p.start) * PX_PER_MIN;
+
+          const st = document.createElement('div');
+          const colorClass = p.isOnline ? 'sticker-danil-online' : 'sticker-danil';
+          st.className = `sticker ${colorClass}`;
+          st.style.top = `${top}px`;
+          st.style.height = `${height}px`;
+
+          if (currentMode === 'overlay') {
+            if (overlayStyle === 'split') {
+              st.style.left = '3%';
+              st.style.width = '47%';
+            } else {
+              st.style.left = '2%';
+              st.style.width = '68%';
+              st.style.zIndex = '5';
+            }
+          } else {
+            st.style.left = '3%';
+            st.style.width = '94%';
+          }
+
+          st.innerHTML = `
+            <div class="sticker-time"><span class="pair-num-badge">${p.num}</span>${p.timeStr}</div>
+            <div class="sticker-title">${p.title}</div>
+            ${p.isOnline ? '<div class="badge-online">🌐 Онлайн</div>' : ''}
+            ${currentMode === 'overlay' ? '<div class="sticker-author-tag">Данил</div>' : ''}
+          `;
+          trackCol.appendChild(st);
+        });
+      }
+
+      // Polina Stickers
+      if (currentMode === 'polina' || currentMode === 'overlay') {
+        polinaPairs.forEach(p => {
+          const top = (p.start - DAY_START_MIN) * PX_PER_MIN;
+          const height = (p.end - p.start) * PX_PER_MIN;
+
+          const st = document.createElement('div');
+          st.className = 'sticker sticker-polina';
+          st.style.top = `${top}px`;
+          st.style.height = `${height}px`;
+
+          if (currentMode === 'overlay') {
+            if (overlayStyle === 'split') {
+              st.style.left = '51%';
+              st.style.width = '46%';
+            } else {
+              st.style.left = '30%';
+              st.style.width = '68%';
+              st.style.zIndex = '6';
+              st.style.opacity = '0.94';
+            }
+          } else {
+            st.style.left = '3%';
+            st.style.width = '94%';
+          }
+
+          st.innerHTML = `
+            <div class="sticker-time"><span class="pair-num-badge">${p.num}</span>${p.timeStr}</div>
+            <div class="sticker-title">${p.title}</div>
+            ${currentMode === 'overlay' ? '<div class="sticker-author-tag">Полина</div>' : ''}
+          `;
+          trackCol.appendChild(st);
+        });
+      }
+    }
+
+    /* =====================================================================
+       RENDER DESKTOP (6 COLUMNS SIDE-BY-SIDE)
+    ===================================================================== */
+    function renderDesktop(info, danilWeek, polinaWeek) {
+      const container = document.getElementById('desktopTimetable');
+      container.innerHTML = '';
+
+      // Header row
+      const timeHeader = document.createElement('div');
+      timeHeader.className = 'header-cell time-head';
+      timeHeader.textContent = 'Время';
+      container.appendChild(timeHeader);
+
+      info.days.forEach(day => {
+        const cell = document.createElement('div');
+        cell.className = `header-cell ${day.isToday ? 'today-header' : ''}`;
+        cell.innerHTML = `
+          <div>${day.short} ${day.isToday ? '●' : ''}</div>
+          <div class="day-date-sub">${day.dateStr}</div>
+        `;
+        container.appendChild(cell);
+      });
+
+      // Time column (left)
+      const timeCol = document.createElement('div');
+      timeCol.className = 'time-col';
+      timeCol.style.height = `${TRACK_HEIGHT}px`;
+
+      for (let h = 8; h <= 21; h++) {
+        const mins = h * 60;
+        const top = (mins - DAY_START_MIN) * PX_PER_MIN;
+        const lbl = document.createElement('div');
+        lbl.className = 'hour-label';
+        lbl.style.top = `${top}px`;
+        lbl.textContent = `${String(h).padStart(2,'0')}:00`;
+        timeCol.appendChild(lbl);
+      }
+      container.appendChild(timeCol);
+
+      // 6 Day columns
+      info.days.forEach(day => {
+        const dayCol = document.createElement('div');
+        dayCol.className = 'day-col';
+        dayCol.style.height = `${TRACK_HEIGHT}px`;
+
+        const danilPairs = danilWeek[day.id] || [];
+        const polinaPairs = polinaWeek[day.id] || [];
+        populateTrackStickers(dayCol, danilPairs, polinaPairs);
+
+        container.appendChild(dayCol);
+      });
+    }
+
+    /* =====================================================================
+       RENDER MOBILE: CYCLIC DAY MODULES (Matches Screenshot!)
+    ===================================================================== */
+    function renderMobile(info, danilWeek, polinaWeek) {
+      // Quick Day Jump Pills
+      const quickNav = document.getElementById('mobileQuickNav');
+      quickNav.innerHTML = '';
+      info.days.forEach(day => {
+        const btn = document.createElement('button');
+        btn.className = `mob-day-pill ${day.isToday ? 'is-today' : ''}`;
+        btn.innerHTML = `${day.short} ${day.dateStr}`;
+        btn.onclick = () => scrollToMobileDay(day.id);
+        quickNav.appendChild(btn);
+      });
+
+      // Day Modules Feed (Each day starts with 08:00 to 21:00!)
+      const feed = document.getElementById('mobileDaysFeed');
+      feed.innerHTML = '';
+
+      info.days.forEach(day => {
+        const module = document.createElement('div');
+        module.id = `mob-module-${day.id}`;
+        module.className = `mobile-day-module ${day.isToday ? 'is-today-module' : ''}`;
+
+        // Module Header: ВРЕМЯ | ДЕНЬ ЧИСЛО
+        const header = document.createElement('div');
+        header.className = 'mobile-module-header';
+        header.innerHTML = `
+          <div class="mob-head-time">ВРЕМЯ</div>
+          <div class="mob-head-day">
+            <div class="mob-day-title-wrap">
+              <span class="mob-day-short">${day.short}</span>
+              <span class="mob-day-date">${day.dateStr}</span>
+            </div>
+            ${day.isToday ? '<span class="today-mini-badge">Сегодня</span>' : ''}
+          </div>
+        `;
+        module.appendChild(header);
+
+        // Module Grid: Time column on left + Track on right
+        const grid = document.createElement('div');
+        grid.className = 'mobile-module-grid';
+
+        // 1. Time Column (08:00 to 21:00)
+        const timeCol = document.createElement('div');
+        timeCol.className = 'mobile-time-col';
+        timeCol.style.height = `${TRACK_HEIGHT}px`;
+
+        for (let h = 8; h <= 21; h++) {
+          const mins = h * 60;
+          const top = (mins - DAY_START_MIN) * PX_PER_MIN;
+          const lbl = document.createElement('div');
+          lbl.className = 'hour-label';
+          lbl.style.top = `${top}px`;
+          lbl.textContent = `${String(h).padStart(2,'0')}:00`;
+          timeCol.appendChild(lbl);
+        }
+        grid.appendChild(timeCol);
+
+        // 2. Track Column with Stickers!
+        const trackCol = document.createElement('div');
+        trackCol.className = 'mobile-track-col';
+        trackCol.style.height = `${TRACK_HEIGHT}px`;
+
+        const danilPairs = danilWeek[day.id] || [];
+        const polinaPairs = polinaWeek[day.id] || [];
+        populateTrackStickers(trackCol, danilPairs, polinaPairs);
+        grid.appendChild(trackCol);
+
+        module.appendChild(grid);
+        feed.appendChild(module);
+      });
+    }
+
+    function renderAll() {
+      const info = getWeekInfo(currentOffsetWeeks);
+
+      const parityStr = info.isEven ? 'Чётная' : 'Нечётная';
+      document.getElementById('weekTitle').textContent = `Неделя ${info.weekNum} (${parityStr})`;
+      document.getElementById('weekDates').textContent = info.rangeText;
+
+      const parsed = parseScheduleData(currentScheduleData);
+      const danilWeek = parsed.danil[info.parityKey];
+      const polinaWeek = parsed.polina[info.parityKey];
+
+      renderDesktop(info, danilWeek, polinaWeek);
+      renderMobile(info, danilWeek, polinaWeek);
+    }
+
+    // Auto-boot on load
+    renderAll();
+
+    // Background auto-sync with GitHub
+    setTimeout(() => {
+      syncSchedule(false);
+    }, 600);
+  </script>
+</body>
+</html>

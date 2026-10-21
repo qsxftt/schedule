@@ -974,7 +974,28 @@
       const btn = document.getElementById('syncBtn');
       if (btn) btn.classList.add('syncing');
       try {
-        const res = await fetch(`${GITHUB_SCHEDULE_URL}?_t=${Date.now()}`, { cache: 'no-store' });
+        let scheduleUrl = `${GITHUB_SCHEDULE_URL}?_t=${Date.now()}`;
+
+        // Instant CDN bypass: fetch latest commit SHA so Fastly/GitHub cache is never stale
+        try {
+          const apiRes = await fetch('https://api.github.com/repos/qsxftt/schedule/commits/main', {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/vnd.github.v3+json' }
+          });
+          if (apiRes.ok) {
+            const apiData = await apiRes.json();
+            if (apiData && apiData.sha) {
+              scheduleUrl = `https://raw.githubusercontent.com/qsxftt/schedule/${apiData.sha}/schedule.json`;
+            }
+          }
+        } catch (apiErr) {
+          console.log('Using direct fallback url:', apiErr);
+        }
+
+        const res = await fetch(scheduleUrl, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const remote = await res.json();
         if (remote && remote.danil && remote.polina) {

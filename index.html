@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Расписание 💕 Данил & Полина</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -629,9 +631,44 @@
       gap: 12px;
       font-size: 0.82rem;
     }
+
+    /* Sync Button Animation & Toast Notification */
+    .syncing #syncIcon {
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(90px);
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
+  <div id="toast" class="toast"></div>
 
   <div class="main-wrap">
 
@@ -662,10 +699,13 @@
         </button>
       </div>
 
-      <!-- Right tools -->
+      /* Right tools */
       <div class="right-tools">
         <button class="style-pill" id="btnOverlayStyle" onclick="toggleOverlayStyle()">
           Стиль: 50% / 50%
+        </button>
+        <button class="btn-arrow" id="syncBtn" onclick="syncSchedule(true)" title="Синхронизировать расписание с GitHub">
+          <span id="syncIcon" style="display:inline-block; transition:transform 0.4s ease;">🔄</span>
         </button>
         <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Светлая/тёмная тема">
           ☀️
@@ -760,135 +800,208 @@
       };
     }
 
-    const RAW_DANIL_SCHEDULE = {
-      // ЧЁТНАЯ НЕДЕЛЯ
-      even: {
-        mon: [
-          p("10:15 - 11:45", "Системная аналитика"),
-          p("16:00 - 17:30", "Современные языки программирования")
-        ],
-        tue: [
-          p("10:15 - 11:45", "Алгоритмы и анализ сложности"),
-          p("16:00 - 17:30", "Теория вероятностей"),
-          p("17:40 - 19:10", "Базы данных")
-        ],
-        wed: [
-          p("10:15 - 11:45", "Теория вероятностей"),
-          p("12:00 - 13:30", "Эффективные коммуникации"),
-          p("16:00 - 17:30", "Прикладная физическая культура"),
-          p("19:15 - 20:45", "Системная аналитика", true) // Зелёный (онлайн)
-        ],
-        thu: [
-          p("12:00 - 13:30", "Современные цифровые инструменты"),
-          p("16:00 - 17:30", "Современные цифровые инструменты")
-        ],
-        fri: [
-          p("10:15 - 11:45", "Прикладная физическая культура")
-        ],
-        sat: [
-          p("08:30 - 10:00", "Компьютерные сети", true) // Зелёный (онлайн)
-        ]
+    const DEFAULT_SCHEDULE_DATA = {
+      version: 1,
+      updatedAt: "2026-10-21",
+      danil: {
+        even: {
+          mon: [
+            { time: "10:15 - 11:45", title: "Системная аналитика" },
+            { time: "16:00 - 17:30", title: "Современные языки программирования" }
+          ],
+          tue: [
+            { time: "10:15 - 11:45", title: "Алгоритмы и анализ сложности" },
+            { time: "16:00 - 17:30", title: "Теория вероятностей" },
+            { time: "17:40 - 19:10", title: "Базы данных" }
+          ],
+          wed: [
+            { time: "10:15 - 11:45", title: "Теория вероятностей" },
+            { time: "12:00 - 13:30", title: "Эффективные коммуникации" },
+            { time: "16:00 - 17:30", title: "Прикладная физическая культура" },
+            { time: "19:15 - 20:45", title: "Системная аналитика", isOnline: true }
+          ],
+          thu: [
+            { time: "12:00 - 13:30", title: "Современные цифровые инструменты" },
+            { time: "16:00 - 17:30", title: "Современные цифровые инструменты" }
+          ],
+          fri: [
+            { time: "10:15 - 11:45", title: "Прикладная физическая культура" }
+          ],
+          sat: [
+            { time: "08:30 - 10:00", title: "Компьютерные сети", isOnline: true }
+          ]
+        },
+        odd: {
+          mon: [
+            { time: "12:00 - 13:30", title: "Алгоритмы и анализ сложности" },
+            { time: "16:00 - 17:30", title: "Современные языки программирования" }
+          ],
+          tue: [
+            { time: "10:15 - 11:45", title: "Алгоритмы и анализ сложности" },
+            { time: "14:15 - 15:45", title: "Базы данных" },
+            { time: "16:00 - 17:30", title: "Теория вероятностей" },
+            { time: "17:40 - 19:10", title: "Базы данных" }
+          ],
+          wed: [
+            { time: "10:15 - 11:45", title: "Теория вероятностей" },
+            { time: "12:00 - 13:30", title: "Эффективные коммуникации" },
+            { time: "16:00 - 17:30", title: "Прикладная физическая культура" },
+            { time: "19:15 - 20:45", title: "Системная аналитика", isOnline: true }
+          ],
+          thu: [
+            { time: "12:00 - 13:30", title: "Современные цифровые инструменты" },
+            { time: "16:00 - 17:30", title: "Современные цифровые инструменты" }
+          ],
+          fri: [
+            { time: "10:15 - 11:45", title: "Прикладная физическая культура" }
+          ],
+          sat: [
+            { time: "08:30 - 10:00", title: "Компьютерные сети", isOnline: true }
+          ]
+        }
       },
-      // НЕЧЁТНАЯ НЕДЕЛЯ
-      odd: {
-        mon: [
-          p("12:00 - 13:30", "Алгоритмы и анализ сложности"),
-          p("16:00 - 17:30", "Современные языки программирования")
-        ],
-        tue: [
-          p("10:15 - 11:45", "Алгоритмы и анализ сложности"),
-          p("14:15 - 15:45", "Базы данных"),
-          p("16:00 - 17:30", "Теория вероятностей"),
-          p("17:40 - 19:10", "Базы данных")
-        ],
-        wed: [
-          p("10:15 - 11:45", "Теория вероятностей"),
-          p("12:00 - 13:30", "Эффективные коммуникации"),
-          p("16:00 - 17:30", "Прикладная физическая культура"),
-          p("19:15 - 20:45", "Системная аналитика", true) // Зелёный (онлайн)
-        ],
-        thu: [
-          p("12:00 - 13:30", "Современные цифровые инструменты"),
-          p("16:00 - 17:30", "Современные цифровые инструменты")
-        ],
-        fri: [
-          p("10:15 - 11:45", "Прикладная физическая культура")
-        ],
-        sat: [
-          p("08:30 - 10:00", "Компьютерные сети", true) // Зелёный (онлайн)
-        ]
+      polina: {
+        even: {
+          mon: [
+            { time: "09:00 - 10:30", title: "Управление конфликтами" },
+            { time: "10:40 - 12:10", title: "Управление человеческими ресурсами" },
+            { time: "12:20 - 13:50", title: "Управление человеческими ресурсами" },
+            { time: "14:30 - 16:00", title: "Второй иностранный язык" },
+            { time: "16:10 - 17:40", title: "Второй иностранный язык" }
+          ],
+          tue: [],
+          wed: [
+            { time: "08:30 - 10:00", title: "Прикладная физическая культура" },
+            { time: "12:20 - 13:50", title: "Деловой английский язык" },
+            { time: "14:30 - 16:00", title: "Командообразование" },
+            { time: "16:10 - 17:40", title: "Командообразование" }
+          ],
+          thu: [
+            { time: "10:15 - 11:45", title: "Риторика" },
+            { time: "12:00 - 13:30", title: "Риторика" },
+            { time: "14:30 - 16:00", title: "История этики" },
+            { time: "16:10 - 17:40", title: "История этики" }
+          ],
+          fri: [
+            { time: "09:00 - 10:30", title: "Креативные экономики" },
+            { time: "10:40 - 12:10", title: "Креативные экономики" },
+            { time: "12:20 - 13:50", title: "Креативные экономики" },
+            { time: "16:00 - 17:30", title: "Прикладная физическая культура" }
+          ],
+          sat: [
+            { time: "09:00 - 10:30", title: "Управление конфликтами" },
+            { time: "12:20 - 13:50", title: "Математика" },
+            { time: "14:30 - 16:00", title: "Математика" }
+          ]
+        },
+        odd: {
+          mon: [
+            { time: "09:00 - 10:30", title: "Управление конфликтами" },
+            { time: "10:40 - 12:10", title: "Управление человеческими ресурсами" },
+            { time: "12:20 - 13:50", title: "Управление человеческими ресурсами" },
+            { time: "14:30 - 16:00", title: "Второй иностранный язык" },
+            { time: "16:10 - 17:40", title: "Второй иностранный язык" }
+          ],
+          tue: [],
+          wed: [
+            { time: "08:30 - 10:00", title: "Прикладная физическая культура" },
+            { time: "12:20 - 13:50", title: "Деловой английский язык" },
+            { time: "14:30 - 16:00", title: "Командообразование" }
+          ],
+          thu: [
+            { time: "10:15 - 11:45", title: "Риторика" },
+            { time: "12:00 - 13:30", title: "Риторика" },
+            { time: "14:30 - 16:00", title: "История этики" },
+            { time: "16:10 - 17:40", title: "История этики" }
+          ],
+          fri: [
+            { time: "09:00 - 10:30", title: "Креативные экономики" },
+            { time: "10:40 - 12:10", title: "Креативные экономики" },
+            { time: "12:20 - 13:50", "title": "Креативные экономики" },
+            { time: "16:00 - 17:30", title: "Прикладная физическая культура" }
+          ],
+          sat: [
+            { time: "09:00 - 10:30", title: "Управление конфликтами" },
+            { time: "12:20 - 13:50", title: "Математика" },
+            { time: "14:30 - 16:00", title: "Математика" }
+          ]
+        }
       }
     };
 
-    const RAW_POLINA_SCHEDULE = {
-      // ЧЁТНАЯ НЕДЕЛЯ
-      even: {
-        mon: [
-          p("09:00 - 10:30", "Управление конфликтами"),
-          p("10:40 - 12:10", "Управление человеческими ресурсами"),
-          p("12:20 - 13:50", "Управление человеческими ресурсами"),
-          p("14:30 - 16:00", "Второй иностранный язык"),
-          p("16:10 - 17:40", "Второй иностранный язык")
-        ],
-        tue: [], // Выходной
-        wed: [
-          p("08:30 - 10:00", "Прикладная физическая культура"),
-          p("12:20 - 13:50", "Деловой английский язык"),
-          p("14:30 - 16:00", "Командообразование"),
-          p("16:10 - 17:40", "Командообразование")
-        ],
-        thu: [
-          p("10:15 - 11:45", "Риторика"),
-          p("12:00 - 13:30", "Риторика"),
-          p("14:30 - 16:00", "История этики"),
-          p("16:10 - 17:40", "История этики")
-        ],
-        fri: [
-          p("09:00 - 10:30", "Креативные экономики"),
-          p("10:40 - 12:10", "Креативные экономики"),
-          p("12:20 - 13:50", "Креативные экономики"),
-          p("16:00 - 17:30", "Прикладная физическая культура")
-        ],
-        sat: [
-          p("09:00 - 10:30", "Управление конфликтами"),
-          p("12:20 - 13:50", "Математика"),
-          p("14:30 - 16:00", "Математика")
-        ]
-      },
-      // НЕЧЁТНАЯ НЕДЕЛЯ
-      odd: {
-        mon: [
-          p("09:00 - 10:30", "Управление конфликтами"),
-          p("10:40 - 12:10", "Управление человеческими ресурсами"),
-          p("12:20 - 13:50", "Управление человеческими ресурсами"),
-          p("14:30 - 16:00", "Второй иностранный язык"),
-          p("16:10 - 17:40", "Второй иностранный язык")
-        ],
-        tue: [], // Выходной
-        wed: [
-          p("08:30 - 10:00", "Прикладная физическая культура"),
-          p("12:20 - 13:50", "Деловой английский язык"),
-          p("14:30 - 16:00", "Командообразование")
-        ],
-        thu: [
-          p("10:15 - 11:45", "Риторика"),
-          p("12:00 - 13:30", "Риторика"),
-          p("14:30 - 16:00", "История этики"),
-          p("16:10 - 17:40", "История этики")
-        ],
-        fri: [
-          p("09:00 - 10:30", "Креативные экономики"),
-          p("10:40 - 12:10", "Креативные экономики"),
-          p("12:20 - 13:50", "Креативные экономики"),
-          p("16:00 - 17:30", "Прикладная физическая культура")
-        ],
-        sat: [
-          p("09:00 - 10:30", "Управление конфликтами"),
-          p("12:20 - 13:50", "Математика"),
-          p("14:30 - 16:00", "Математика")
-        ]
+    const STORAGE_KEY = 'danil_polina_schedule_v2';
+    const GITHUB_SCHEDULE_URL = 'https://raw.githubusercontent.com/qsxftt/schedule/main/schedule.json';
+
+    let currentScheduleData = DEFAULT_SCHEDULE_DATA;
+
+    // Load cached schedule from localStorage immediately on startup
+    try {
+      const cached = localStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.danil && parsed.polina) {
+          currentScheduleData = parsed;
+        }
       }
-    };
+    } catch (e) {
+      console.warn('LocalStorage load error:', e);
+    }
+
+    function parseScheduleData(rawObj) {
+      const res = { danil: { even: {}, odd: {} }, polina: { even: {}, odd: {} } };
+      for (const person of ['danil', 'polina']) {
+        for (const parity of ['even', 'odd']) {
+          const days = (rawObj && rawObj[person] && rawObj[person][parity]) || {};
+          for (const d of ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']) {
+            const list = days[d] || [];
+            res[person][parity][d] = list.map(item => p(item.time, item.title, Boolean(item.isOnline), item.num));
+          }
+        }
+      }
+      return res;
+    }
+
+    function showToast(msg) {
+      let t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    async function syncSchedule(isManual = false) {
+      const btn = document.getElementById('syncBtn');
+      if (btn) btn.classList.add('syncing');
+      try {
+        const res = await fetch(`${GITHUB_SCHEDULE_URL}?_t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const remote = await res.json();
+        if (remote && remote.danil && remote.polina) {
+          const currentStr = JSON.stringify(currentScheduleData);
+          const remoteStr = JSON.stringify(remote);
+          if (currentStr !== remoteStr) {
+            currentScheduleData = remote;
+            try {
+              localStorage.setItem(STORAGE_KEY, remoteStr);
+            } catch(e) {}
+            renderAll();
+            showToast('✨ Расписание обновлено из GitHub');
+          } else if (isManual) {
+            showToast('👍 Расписание уже актуально');
+          }
+        }
+      } catch (err) {
+        console.log('Sync note:', err.message);
+        if (isManual) {
+          showToast('📱 Офлайн-режим: данные загружены из памяти');
+        }
+      } finally {
+        if (btn) {
+          setTimeout(() => btn.classList.remove('syncing'), 450);
+        }
+      }
+    }
 
     /* =====================================================================
        AUTOMATIC CALENDAR DATE & WEEK PARITY LOGIC
@@ -1229,8 +1342,9 @@
       document.getElementById('weekTitle').textContent = `Неделя ${info.weekNum} (${parityStr})`;
       document.getElementById('weekDates').textContent = info.rangeText;
 
-      const danilWeek = RAW_DANIL_SCHEDULE[info.parityKey];
-      const polinaWeek = RAW_POLINA_SCHEDULE[info.parityKey];
+      const parsed = parseScheduleData(currentScheduleData);
+      const danilWeek = parsed.danil[info.parityKey];
+      const polinaWeek = parsed.polina[info.parityKey];
 
       renderDesktop(info, danilWeek, polinaWeek);
       renderMobile(info, danilWeek, polinaWeek);
@@ -1238,6 +1352,11 @@
 
     // Auto-boot on load
     renderAll();
+
+    // Background auto-sync with GitHub
+    setTimeout(() => {
+      syncSchedule(false);
+    }, 600);
   </script>
 </body>
 </html>
